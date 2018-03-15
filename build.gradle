@@ -12,9 +12,9 @@ model {
 	repositories {
         libs(PrebuiltLibraries) {
             googleTest {
-                headers.srcDir "googletest/build/install/include"
+                headers.srcDir "gtest/build/install/include"
                 binaries.withType(StaticLibraryBinary) {
-                    staticLibraryFile = file("googletest\\build\\install\\lib\\libgtest.a")
+                    staticLibraryFile = file("gtest\\build\\install\\lib\\libgtest.a")
                 }
             }
         }
