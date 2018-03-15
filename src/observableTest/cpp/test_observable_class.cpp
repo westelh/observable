@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include <string>
 #include "observable.hpp"
 using namespace testing;
 
@@ -7,6 +8,13 @@ int main(int argc, char **argv) {
   return RUN_ALL_TESTS();
 }
 
-TEST(Observable_class_test, hoge) {
-	observable<int> wei;
+class Observable_class_test: public ::testing::Test {
+    public:
+        observable<int> intobsrv;
+        observable<std::string> strobsrv;
+};
+
+TEST_F(Observable_class_test, hoge) {
+    ASSERT_EQ(intobsrv.get(), 0);
+    ASSERT_EQ(strobsrv.get(), "");
 }
