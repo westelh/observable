@@ -1,0 +1,36 @@
+apply plugin: 'cpp'
+apply plugin: 'google-test'
+
+model {
+	flavors {
+        passing
+        failing
+    }
+	components {
+		observable(NativeLibrarySpec)
+	}
+	repositories {
+        libs(PrebuiltLibraries) {
+            googleTest {
+                headers.srcDir "googletest/build/install/include"
+                binaries.withType(StaticLibraryBinary) {
+                    staticLibraryFile = file("googletest\\build\\install\\lib\\libgtest.a")
+                }
+            }
+        }
+    }
+	binaries {
+		withType(GoogleTestTestSuiteBinarySpec) {
+            lib library: "googleTest", linkage: "static"
+
+            if (flavor == flavors.failing) {
+                cppCompiler.define "PLUS_BROKEN"
+            }
+
+            if (targetPlatform.operatingSystem.linux) {
+                cppCompiler.args '-pthread'
+                linker.args '-pthread'
+            }
+        }
+	}
+}
