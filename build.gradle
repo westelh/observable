@@ -20,6 +20,10 @@ model {
         }
     }
 	binaries {
+        all {
+            if (toolChain in GccCompatibleToolChain)
+                cppCompiler.args "-std=c++14", "-Wall", "-Wextra"
+        }
 		withType(GoogleTestTestSuiteBinarySpec) {
             lib library: "googleTest", linkage: "static"
 
