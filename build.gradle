@@ -6,6 +6,10 @@ model {
         passing
         failing
     }
+    buildTypes {
+        debug
+        release
+    }
 	components {
         observer(NativeLibrarySpec) 
 		observable(NativeLibrarySpec) {
@@ -26,8 +30,13 @@ model {
     }
 	binaries {
         all {
-            if (toolChain in GccCompatibleToolChain)
+            if (toolChain in GccCompatibleToolChain) {
                 cppCompiler.args "-std=c++14", "-Wall", "-Wextra"
+                if (buildType == buildTypes.debug)
+                    cppCompiler.args "-g3", "-O0"
+                else if (buildType == buildTypes.release)
+                    cppCompiler.args "-O2"
+            }
         }
 		withType(GoogleTestTestSuiteBinarySpec) {
             lib library: "googleTest", linkage: "static"
