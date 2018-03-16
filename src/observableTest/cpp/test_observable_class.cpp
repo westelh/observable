@@ -15,3 +15,14 @@ class Observable_class_test: public ::testing::Test {
 
         Observable_class_test(): intobsrv{0}, strobsrv{""} {  }
 };
+
+TEST(Observable_class_test, constructionTest) {
+    const int c_ori = 50;
+    int ori = 70;
+    // observable(const T&)
+    observable<int> cT{c_ori};
+    // observable(T&)
+    observable<int> c{ori};
+    // observable(T&&)
+    observable<int>(80);
+}

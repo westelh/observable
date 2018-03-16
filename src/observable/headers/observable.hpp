@@ -7,6 +7,7 @@ class observable {
     public:
         observable();
         observable(const T&);
+        observable(T&&);
         T get() const noexcept;
 };
 
@@ -16,6 +17,9 @@ observable<T>::observable(): value{} {  }
 
 template <class T>
 observable<T>::observable(const T& t): value{t} {  }
+
+template <class T>
+observable<T>::observable(T&& t): value{std::forward<T>(t)} {  }
 
 template <class T>
 T observable<T>::get() const noexcept {
