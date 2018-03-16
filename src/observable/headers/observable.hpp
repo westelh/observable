@@ -2,6 +2,7 @@
 #define INCLUDE_OBSERVABLE_HPP
 
 #include <mutex>
+#include "../../observer/headers/observer.hpp"
 
 template <class T>
 class observable {
@@ -48,4 +49,5 @@ void observable<T>::set(T&& t) noexcept {
     auto l = lock();
     value_m = std::forward<T>(t);
 }
+
 #endif
