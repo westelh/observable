@@ -12,7 +12,7 @@ class observable {
 
 
 template <class T>
-observable<T>::observable() {  }
+observable<T>::observable(): value{} {  }
 
 template <class T>
 observable<T>::observable(const T& t): value{t} {  }

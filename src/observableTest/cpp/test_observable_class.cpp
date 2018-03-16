@@ -12,9 +12,6 @@ class Observable_class_test: public ::testing::Test {
     public:
         observable<int> intobsrv;
         observable<std::string> strobsrv;
-};
 
-TEST_F(Observable_class_test, hoge) {
-    ASSERT_EQ(intobsrv.get(), 0);
-    ASSERT_EQ(strobsrv.get(), "");
-}
+        Observable_class_test(): intobsrv{0}, strobsrv{""} {  }
+};
