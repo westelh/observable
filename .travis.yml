@@ -1,0 +1,41 @@
+sudo: false
+language: cpp
+
+before_install:
+
+matrix:
+  include:
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env: COMPILER=g++-7
+    - compiler: gcc
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env: COMPILER=g++-5
+    - compiler: clang
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+            - llvm-toolchain-precise-3.6
+          packages:
+            - clang-3.6
+            - libc++-dev
+      env:
+        - COMPILER=clang++-3.6
+        - CPLOPT=-stdlib=libc++
+script:
+  ./gtest_build.sh
+  ./gradlew build
+
+after_success:
+- coveralls --exclude "catch" --exclude "test"
