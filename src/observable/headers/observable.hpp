@@ -2,11 +2,15 @@
 #define INCLUDE_OBSERVABLE_HPP
 
 #include <mutex>
+#include <memory>
+#include <vector>
+#include <stdexcept>
 #include "../../observer/headers/observer.hpp"
 
 template <class T>
 class observable {
         T value_m;
+        std::vector<std::unique_ptr<observer<T>>> observers_m;
         mutable std::recursive_mutex mutex_m;
     protected:
         inline std::unique_lock<std::recursive_mutex> lock() const noexcept;
@@ -17,6 +21,7 @@ class observable {
         T get() const noexcept;
         void set(const T&) noexcept;
         void set(T&&) noexcept;
+        void attach(std::unique_ptr<observer<T>>&&);
 };
 
 template <class T>
@@ -48,6 +53,16 @@ template <class T>
 void observable<T>::set(T&& t) noexcept {
     auto l = lock();
     value_m = std::forward<T>(t);
+}
+
+template <class T>
+void observable<T>::attach(std::unique_ptr<observer<T>>&& ptr) {
+    if (ptr) {
+        auto l = lock();
+        observers_m.emplace_back(std::move(ptr));
+    } else {
+        throw std::invalid_argument{"Attached observer doesn't have resource"};
+    }
 }
 
 #endif
