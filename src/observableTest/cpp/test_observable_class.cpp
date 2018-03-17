@@ -12,6 +12,8 @@ template <class T>
 class test_observer: public observer<T> {
     public:
         const std::string name;
+        test_observer(): name{"unnamed"} {  }
+        test_observer(const std::string& str): name{str} {  }
         void update(const T&, const T&) override {
         }
 };
@@ -69,4 +71,17 @@ TEST_F(Observable_class_test, no_throw_when_attach_int_observer_normally_with_lv
 TEST_F(Observable_class_test, no_throw_when_attach_string_observer_normally_with_lvalue_key) {
     std::string lvalue_key = "call attach(std::string&, ...)";
     ASSERT_NO_THROW(strobsrv.attach(lvalue_key, std::make_unique<test_observer<std::string>>())); 
+}
+
+template <class T>
+observable<T> make_observed(observable<T>&& orig) noexcept {
+    observable<T> ret{std::move(orig)};
+    ret.attach("first", std::make_unique<test_observer<T>>("first observer"));
+    ret.attach("second", std::make_unique<test_observer<T>>("second observer"));
+    return ret;
+}
+
+TEST_F(Observable_class_test, throw_exception_when_request_observer_by_not_exist_key) {
+    auto obs = make_observed(std::move(intobsrv));
+    ASSERT_THROW(obs.get_observer_by_key("not exist key"), std::out_of_range);
 }
