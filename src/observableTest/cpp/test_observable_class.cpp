@@ -85,3 +85,13 @@ TEST_F(Observable_class_test, throw_exception_when_request_observer_by_not_exist
     auto obs = make_observed(std::move(intobsrv));
     ASSERT_THROW(obs.get_observer_by_key("not exist key"), std::out_of_range);
 }
+
+TEST_F(Observable_class_test, request_first_observer_normally) {
+    auto obs = make_observed(std::move(intobsrv));
+    ASSERT_EQ(dynamic_cast<test_observer<int>*>(obs.get_observer_by_key("first").get())->name, std::string{"first observer"});
+}
+
+TEST_F(Observable_class_test, request_second_observer_normally) {
+    auto obs = make_observed(std::move(intobsrv));
+    ASSERT_EQ(dynamic_cast<test_observer<int>*>(obs.get_observer_by_key("second").get())->name, std::string{"second observer"});
+}
