@@ -15,6 +15,7 @@ class observable {
         T value_m;
         std::unordered_map<std::string, observer_ptr> observers_m;
         mutable std::recursive_mutex mutex_m;
+        void notify(const T& old, const T& new_) noexcept;
     protected:
         inline std::unique_lock<std::recursive_mutex> lock() const noexcept;
     public:
@@ -27,12 +28,20 @@ class observable {
         void set(T&&) noexcept;
         void attach(const std::string&, observer_ptr&&);
         void attach(std::string&&, observer_ptr&&);
+        void set_observers(std::unordered_map<std::string, observer_ptr>&&) noexcept;
         const observer_ptr& get_observer_by_key(const std::string& key) const;
 };
 
 template <class T>
 std::unique_lock<std::recursive_mutex> observable<T>::lock() const noexcept {
     return std::unique_lock<std::recursive_mutex>{mutex_m};
+}
+
+template <class T>
+void observable<T>::notify(const T& old, const T& new_) noexcept {
+    for (auto&& i : observers_m) {
+        i.second.update(old, new_);
+    }
 }
 
 template <class T>
@@ -59,12 +68,14 @@ T observable<T>::get() const noexcept {
 template <class T>
 void observable<T>::set(const T& t) noexcept {
     auto l = lock();
+    notify(value_m, t);
     value_m = t;
 }
 
 template <class T>
 void observable<T>::set(T&& t) noexcept {
     auto l = lock();
+    notify(value_m, t);
     value_m = std::forward<T>(t);
 }
 
@@ -86,6 +97,11 @@ void observable<T>::attach(std::string&& key, observer_ptr&& val) {
     } else {
         throw std::invalid_argument{"Attached observer doesn't have resource"};
     }
+}
+
+template <class T>
+void observable<T>::set_observers(std::unordered_map<std::string, observer_ptr>&& map) noexcept {
+    observers_m.swap(map);
 }
 
 template <class T>
