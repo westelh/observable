@@ -21,6 +21,7 @@ class observable {
         observable();
         observable(const T&);
         observable(T&&);
+        observable(observable<T>&&);
         T get() const noexcept;
         void set(const T&) noexcept;
         void set(T&&) noexcept;
@@ -42,6 +43,13 @@ observable<T>::observable(const T& t): value_m{t} {  }
 
 template <class T>
 observable<T>::observable(T&& t): value_m{std::forward<T>(t)} {  }
+
+template <class T>
+observable<T>::observable(observable<T>&& o):
+    value_m{std::move(o.value_m)},
+    observers_m{std::move(o.observers_m)},
+    mutex_m{} {  }
+
 
 template <class T>
 T observable<T>::get() const noexcept {
@@ -83,7 +91,7 @@ void observable<T>::attach(std::string&& key, observer_ptr&& val) {
 template <class T>
 const typename observable<T>::observer_ptr& observable<T>::get_observer_by_key(const std::string& key) const {
     if (auto itr = observers_m.find(key); itr != observers_m.end()) {
-        return *itr;
+        return itr->second;
     } else {
         throw std::out_of_range{"key:"+key+" not found on observers map"};
     }
