@@ -34,5 +34,5 @@ matrix:
         - COMPILER=clang++-3.6
         - CPLOPT=-stdlib=libc++
 script:
-  ./gtest_build.sh
-  ./gradlew build
+  - ./gtest_build.sh
+  - ./gradlew build
