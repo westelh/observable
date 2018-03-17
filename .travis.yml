@@ -36,6 +36,3 @@ matrix:
 script:
   ./gtest_build.sh
   ./gradlew build
-
-after_success:
-- coveralls --exclude "catch" --exclude "test"
