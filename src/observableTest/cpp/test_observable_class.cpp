@@ -11,6 +11,7 @@ int main(int argc, char **argv) {
 template <class T>
 class test_observer: public observer<T> {
     public:
+        const std::string name;
         void update(const T&, const T&) override {
         }
 };
@@ -34,12 +35,38 @@ TEST_F(Observable_class_test, constructionTest) {
     observable<int>(80);
 }
 
-TEST_F(Observable_class_test, attach_null_observer) {
-    ASSERT_THROW(intobsrv.attach(std::unique_ptr<test_observer<int>>()), std::invalid_argument);
-    ASSERT_THROW(strobsrv.attach(std::unique_ptr<test_observer<std::string>>()), std::invalid_argument);
+TEST_F(Observable_class_test, throw_exception_when_attach_null_int_observer_with_rvalue_key) {
+    ASSERT_THROW(intobsrv.attach(std::string{"null observer"}, std::unique_ptr<test_observer<int>>()), std::invalid_argument);
 }
 
-TEST_F(Observable_class_test, attach_observer_normally) {
-    ASSERT_NO_THROW(intobsrv.attach(std::make_unique<test_observer<int>>()));
-    ASSERT_NO_THROW(strobsrv.attach(std::make_unique<test_observer<std::string>>()));
+TEST_F(Observable_class_test, throw_exception_when_attach_null_string_observer_with_rvalue_key) {
+    ASSERT_THROW(strobsrv.attach("null observer", std::unique_ptr<test_observer<std::string>>()), std::invalid_argument);
+}
+
+TEST_F(Observable_class_test, throw_exception_when_attach_null_int_observer_with_lvalue_key) {
+    std::string lvalue_key = "call attach(std::string&, ...)";
+    ASSERT_THROW(intobsrv.attach(lvalue_key, observable<int>::observer_ptr{}), std::invalid_argument);
+}
+
+TEST_F(Observable_class_test, throw_exception_when_attach_null_string_observer_with_lvalue_key) {
+    std::string lvalue_key = "call attach(std::string&, ...)";
+    ASSERT_THROW(strobsrv.attach(lvalue_key, observable<std::string>::observer_ptr{}), std::invalid_argument);
+}
+
+TEST_F(Observable_class_test, no_throw_when_attach_int_observer_normally_with_rvalue_key) {
+    ASSERT_NO_THROW(intobsrv.attach("normal observer", std::make_unique<test_observer<int>>()));
+}
+
+TEST_F(Observable_class_test, no_throw_when_attach_string_observer_normally_with_rvalue_key) {
+    ASSERT_NO_THROW(strobsrv.attach("normal observer", std::make_unique<test_observer<std::string>>()));
+}
+
+TEST_F(Observable_class_test, no_throw_when_attach_int_observer_normally_with_lvalue_key) {
+    std::string lvalue_key = "call attach(std::string&, ...)";
+    ASSERT_NO_THROW(intobsrv.attach(lvalue_key, std::make_unique<test_observer<int>>()));
+}
+
+TEST_F(Observable_class_test, no_throw_when_attach_string_observer_normally_with_lvalue_key) {
+    std::string lvalue_key = "call attach(std::string&, ...)";
+    ASSERT_NO_THROW(strobsrv.attach(lvalue_key, std::make_unique<test_observer<std::string>>())); 
 }

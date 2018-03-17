@@ -3,14 +3,17 @@
 
 #include <mutex>
 #include <memory>
-#include <vector>
+#include <unordered_map>
 #include <stdexcept>
 #include "../../observer/headers/observer.hpp"
 
 template <class T>
 class observable {
+    public:
+        using observer_ptr = std::unique_ptr<observer<T>>;
+    private:
         T value_m;
-        std::vector<std::unique_ptr<observer<T>>> observers_m;
+        std::unordered_map<std::string, observer_ptr> observers_m;
         mutable std::recursive_mutex mutex_m;
     protected:
         inline std::unique_lock<std::recursive_mutex> lock() const noexcept;
@@ -21,7 +24,9 @@ class observable {
         T get() const noexcept;
         void set(const T&) noexcept;
         void set(T&&) noexcept;
-        void attach(std::unique_ptr<observer<T>>&&);
+        void attach(const std::string&, observer_ptr&&);
+        void attach(std::string&&, observer_ptr&&);
+        const observer_ptr& get_observer_by_key(const std::string& key) const;
 };
 
 template <class T>
@@ -56,12 +61,31 @@ void observable<T>::set(T&& t) noexcept {
 }
 
 template <class T>
-void observable<T>::attach(std::unique_ptr<observer<T>>&& ptr) {
-    if (ptr) {
+void observable<T>::attach(const std::string& key, observer_ptr&& val) {
+    if (val) {
         auto l = lock();
-        observers_m.emplace_back(std::move(ptr));
+        observers_m.emplace(std::make_pair(key, observer_ptr{std::move(val)}));
     } else {
         throw std::invalid_argument{"Attached observer doesn't have resource"};
+    }
+}
+
+template <class T>
+void observable<T>::attach(std::string&& key, observer_ptr&& val) {
+    if (val) {
+        auto l = lock();
+        observers_m.emplace(std::make_pair(std::string{std::move(key)}, observer_ptr{std::move(val)}));
+    } else {
+        throw std::invalid_argument{"Attached observer doesn't have resource"};
+    }
+}
+
+template <class T>
+const typename observable<T>::observer_ptr& observable<T>::get_observer_by_key(const std::string& key) const {
+    if (auto itr = observers_m.find(key); itr != observers_m.end()) {
+        return *itr;
+    } else {
+        throw std::out_of_range{"key:"+key+" not found on observers map"};
     }
 }
 
