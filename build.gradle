@@ -1,40 +1,54 @@
-apply plugin: 'cpp'
-apply plugin: 'google-test'
+apply plugin: 'cpp-library'
+apply plugin: 'cpp-unit-test'
 
-model {
-	flavors {
-        passing
-        failing
+repositories {
+    maven {
+        url 'https://repo.gradle.org/gradle/libs-snapshots-local/'
     }
-	components {
-		observable(NativeLibrarySpec)
-	}
-	repositories {
-        libs(PrebuiltLibraries) {
-            googleTest {
-                headers.srcDir "gtest/build/install/include"
-                binaries.withType(StaticLibraryBinary) {
-                    staticLibraryFile = file("gtest\\build\\install\\lib\\libgtest.a")
-                }
-            }
-        }
-    }
-	binaries {
-        all {
-            if (toolChain in GccCompatibleToolChain)
-                cppCompiler.args "-std=c++14", "-Wall", "-Wextra"
-        }
-		withType(GoogleTestTestSuiteBinarySpec) {
-            lib library: "googleTest", linkage: "static"
-
-            if (flavor == flavors.failing) {
-                cppCompiler.define "PLUS_BROKEN"
-            }
-
-            if (targetPlatform.operatingSystem.linux) {
-                cppCompiler.args '-pthread'
-                linker.args '-pthread'
-            }
-        }
-	}
 }
+
+unitTest {
+    dependencies {
+        testImplementation 'org.gradle.cpp-samples:googletest_macosx_x86-64_4.5:1.9.0-SNAPSHOT'
+    }
+
+    
+}
+
+//#model {
+//	flavors {
+//        passing
+//        failing
+//    }
+//	components {
+//		observable(NativeLibrarySpec)
+//	}
+//	repositories {
+//        libs(PrebuiltLibraries) {
+//            googleTest {
+//                headers.srcDir "gtest/build/install/include"
+//                binaries.withType(StaticLibraryBinary) {
+//                    staticLibraryFile = file("gtest\\build\\install\\lib\\libgtest.a")
+//                }
+//            }
+//        }
+//    }
+//	binaries {
+//        all {
+//            if (toolChain in GccCompatibleToolChain)
+//                cppCompiler.args "-std=c++14", "-Wall", "-Wextra"
+//        }
+//		withType(GoogleTestTestSuiteBinarySpec) {
+//            lib library: "googleTest", linkage: "static"
+//
+//            if (flavor == flavors.failing) {
+//                cppCompiler.define "PLUS_BROKEN"
+//            }
+//
+//            if (targetPlatform.operatingSystem.linux) {
+//                cppCompiler.args '-pthread'
+//                linker.args '-pthread'
+//            }
+//        }
+//	}
+//}
